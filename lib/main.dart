@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'theme/app_theme.dart';
@@ -17,9 +18,15 @@ class MyApp extends StatelessWidget {
       theme: buildAppTheme(),
       home: const LoginScreen(),
       routes: {
-        '/home': (_) => const Scaffold(body: Center(child: Text('Home'))),
-        '/register': (_) => const Scaffold(body: Center(child: Text('Sign up'))),
-        '/forgot': (_) => const Scaffold(body: Center(child: Text('Forgot password'))),
+        '/home': (_) => const Scaffold(
+          body: Center(child: Text('Home')),
+        ),
+        '/register': (_) => const Scaffold(
+          body: Center(child: Text('Sign up')),
+        ),
+        '/forgot': (_) => const Scaffold(
+          body: Center(child: Text('Forgot password')),
+        ),
       },
     );
   }
