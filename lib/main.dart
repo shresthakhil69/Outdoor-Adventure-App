@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -16,8 +16,9 @@ class MyApp extends StatelessWidget {
       title: 'Yak & Trail',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      home: const LoginScreen(),
+      home: const OnboardingScreen(),
       routes: {
+        '/login': (_) => const LoginScreen(),
         '/home': (_) => const Scaffold(
           body: Center(child: Text('Home')),
         ),
