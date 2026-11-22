@@ -1,3 +1,4 @@
+import 'screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -22,9 +23,8 @@ class MyApp extends StatelessWidget {
         '/home': (_) => const Scaffold(
           body: Center(child: Text('Home')),
         ),
-        '/register': (_) => const Scaffold(
-          body: Center(child: Text('Sign up')),
-        ),
+        '/register': (_) =>  RegisterScreen(),
+
         '/forgot': (_) => const Scaffold(
           body: Center(child: Text('Forgot password')),
         ),
