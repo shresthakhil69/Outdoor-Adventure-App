@@ -14,13 +14,15 @@ class OnboardingScreen extends StatelessWidget {
         child: Column(
           children: [
             const _HeroSection(),
-            // Commits 4-5 replace this temporary button with the white card.
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: TextButton(
-                onPressed: () => Navigator.pushNamed(context, '/login'),
-                child: const Text('Onboarding (temporary) - go to Login'),
-              ),
+
+            Transform.translate(
+              offset: const Offset(0, -32),
+              child: const _SheetCard(),
+            ),
+
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, '/login'),
+              child: const Text('Onboarding (temporary) - go to Login'),
             ),
           ],
         ),
@@ -290,6 +292,213 @@ class _Chip extends StatelessWidget {
               height: 16 / 11,
               letterSpacing: 0.5,
               color: const Color(0xFF023616),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+/// White rounded card that sits on the photo (Figma: 24px radius, 20px padding).
+class _SheetCard extends StatelessWidget {
+  const _SheetCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(
+              color: Color(0x1A000000),
+              blurRadius: 25,
+              spreadRadius: -5,
+              offset: Offset(0, 20)),
+          BoxShadow(
+              color: Color(0x1A000000),
+              blurRadius: 10,
+              spreadRadius: -6,
+              offset: Offset(0, 8)),
+        ],
+      ),
+      child: const Column(
+        children: [
+          _TelemetryBox(),
+          SizedBox(height: 16),
+          _TrustTiles(),
+          // Commit 5 adds the two buttons and the legal text here.
+        ],
+      ),
+    );
+  }
+}
+
+class _TelemetryBox extends StatelessWidget {
+  const _TelemetryBox();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F0),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E4D2B),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                    color: Color(0x0D000000),
+                    blurRadius: 2,
+                    offset: Offset(0, 1)),
+              ],
+            ),
+            child: const Icon(Icons.explore_outlined,
+                size: 20, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Topographic Engine',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    height: 16 / 11,
+                    letterSpacing: 0.5,
+                    color: const Color(0xFF414941),
+                  ),
+                ),
+                Text(
+                  'Annapurna Circuit & EBC',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    height: 24 / 16,
+                    letterSpacing: 0.15,
+                    color: const Color(0xFF191C1A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '5,416m\nMax',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  height: 16 / 11,
+                  letterSpacing: 0.5,
+                  color: const Color(0xFF2C694E),
+                ),
+              ),
+              Text(
+                'Thorong La',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  height: 16 / 11,
+                  letterSpacing: 0.5,
+                  color: const Color(0xFF414941),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrustTiles extends StatelessWidget {
+  const _TrustTiles();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(
+          child: _TrustTile(
+            icon: Icons.cloud_off_outlined,
+            title: '100% Offline',
+            subtitle: 'Topos Cached',
+          ),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: _TrustTile(
+            icon: Icons.verified_user_outlined,
+            title: 'Sherpa Peer',
+            subtitle: 'Verified Paths',
+          ),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: _TrustTile(
+            icon: Icons.badge_outlined,
+            title: 'TIMS Ready',
+            subtitle: 'Permit Vault',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TrustTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  const _TrustTile(
+      {required this.icon, required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: const Color(0x99F3F4F0),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: const Color(0xFF2C694E)),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              height: 16 / 11,
+              letterSpacing: 0.5,
+              color: const Color(0xFF191C1A),
+            ),
+          ),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              fontWeight: FontWeight.w400,
+              height: 12 / 10,
+              color: const Color(0xFF414941),
             ),
           ),
         ],
