@@ -1,5 +1,7 @@
+import 'screens/register_screen.dart';
 import 'package:flutter/material.dart';
-
+import 'screens/login_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'screens/settings_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -13,10 +15,22 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Yak & Trail',
-      theme: AppTheme.light,
-      home: const SettingsScreen(),
+      debugShowCheckedModeBanner: false,
+      theme: buildAppTheme(),
+      home: const OnboardingScreen(),
+      routes: {
+        '/login': (_) => const LoginScreen(),
+        '/home': (_) => const Scaffold(
+          body: Center(child: Text('Home')),
+        ),
+        '/register': (_) =>  RegisterScreen(),
+
+        '/forgot': (_) => const Scaffold(
+          body: Center(child: Text('Forgot password')),
+        ),
+        '/settings': (_) => const SettingsScreen(),
+      },
     );
   }
 }
