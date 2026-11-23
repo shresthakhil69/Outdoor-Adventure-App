@@ -26,7 +26,7 @@ class OnboardingScreen extends StatelessWidget {
   }
 }
 
-/// Top 520px: mountain photo with two gradient layers (from Figma).
+
 class _HeroBackground extends StatelessWidget {
   const _HeroBackground();
 
