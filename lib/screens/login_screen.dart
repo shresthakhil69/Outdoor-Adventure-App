@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_text_field.dart';
@@ -14,6 +15,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
@@ -44,6 +46,35 @@ class _LoginScreenState extends State<LoginScreen> {
     // TODO(Sprint 2): call the real login. For now this is a fake success.
     // To demo the wrong-password message, set: _loginError = 'Wrong email or password';
     Navigator.pushReplacementNamed(context, '/home');
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final userCredential = await _authService.signInWithGoogle();
+      if (!mounted) return;
+
+      if (userCredential != null && userCredential.user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Welcome, ${userCredential.user?.displayName ?? 'User'}!'),
+          ),
+        );
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google Sign-In was cancelled.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google Sign-In failed: ${e.toString()}'),
+        ),
+      );
+    }
   }
 
   void _todo(String what) => ScaffoldMessenger.of(context)
@@ -408,7 +439,7 @@ class _LoginScreenState extends State<LoginScreen> {
           icon: const Text('G',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF4285F4))),
           label: 'Continue with Google',
-          onPressed: () => _todo('Google sign-in'),
+          onPressed: _handleGoogleSignIn,
         ),
         const SizedBox(height: 8),
         SocialButton(

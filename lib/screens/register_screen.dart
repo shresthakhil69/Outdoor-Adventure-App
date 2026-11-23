@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -12,6 +13,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  // Service to handle Google Sign-In and Firebase Auth
+  final _authService = AuthService();
+
   // Key used to validate the form inputs
   final _formKey = GlobalKey<FormState>();
 
@@ -79,6 +83,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Form is valid'),
+        ),
+      );
+    }
+  }
+
+  // Handle Google Sign-In action
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final userCredential = await _authService.signInWithGoogle();
+      if (!mounted) return;
+
+      if (userCredential != null && userCredential.user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Welcome, ${userCredential.user?.displayName ?? 'User'}!'),
+          ),
+        );
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google Sign-In was cancelled.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Sign-in failed: ${e.toString()}'),
         ),
       );
     }
@@ -685,9 +719,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            // TODO: Implement Google Sign Up flow
-          },
+          onTap: _handleGoogleSignIn,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -732,9 +764,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
         GestureDetector(
-          onTap: () {
-            // TODO: Navigate to Login screen
-          },
+          onTap: () => Navigator.pushNamed(context, '/login'),
           child: Text(
             'Log In',
             style: AppText.style(

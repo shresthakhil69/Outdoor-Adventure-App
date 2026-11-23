@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/register_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -23,10 +24,8 @@ class MyApp extends StatelessWidget {
       home: const OnboardingScreen(),
       routes: {
         '/login': (_) => const LoginScreen(),
-        '/home': (_) => const Scaffold(
-          body: Center(child: Text('Home')),
-        ),
-        '/register': (_) =>  RegisterScreen(),
+        '/home': (_) => const HomeScreen(),
+        '/register': (_) => const RegisterScreen(),
 
         '/forgot': (_) => const Scaffold(
           body: Center(child: Text('Forgot password')),
