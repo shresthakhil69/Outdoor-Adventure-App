@@ -20,10 +20,7 @@ class OnboardingScreen extends StatelessWidget {
               child: const _SheetCard(),
             ),
 
-            TextButton(
-              onPressed: () => Navigator.pushNamed(context, '/login'),
-              child: const Text('Onboarding (temporary) - go to Login'),
-            ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -324,12 +321,18 @@ class _SheetCard extends StatelessWidget {
               offset: Offset(0, 8)),
         ],
       ),
-      child: const Column(
+      child: Column(
         children: [
-          _TelemetryBox(),
-          SizedBox(height: 16),
-          _TrustTiles(),
-          // Commit 5 adds the two buttons and the legal text here.
+          const _TelemetryBox(),
+          const SizedBox(height: 16),
+          const _TrustTiles(),
+          const SizedBox(height: 20),
+          _StartButton(onTap: () => Navigator.pushNamed(context, '/login')),
+          const SizedBox(height: 16),
+          _TrailPassButton(
+              onTap: () => Navigator.pushNamed(context, '/login')),
+          const SizedBox(height: 15),
+          const _LegalText(),
         ],
       ),
     );
@@ -502,6 +505,135 @@ class _TrustTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Primary action: 56px high green button with a round arrow (Figma).
+class _StartButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _StartButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E4D2B),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+              color: Color(0x1A000000),
+              blurRadius: 6,
+              spreadRadius: -1,
+              offset: Offset(0, 4)),
+          BoxShadow(
+              color: Color(0x1A000000),
+              blurRadius: 4,
+              spreadRadius: -2,
+              offset: Offset(0, 2)),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SizedBox(
+              height: 56,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Start Expedition',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      height: 24 / 16,
+                      letterSpacing: 0.4,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: Color(0x26FFFFFF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.arrow_forward,
+                        size: 16, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Secondary action: 48px high grey button for returning users.
+class _TrailPassButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _TrailPassButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFFE7E9E5),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: SizedBox(
+          height: 48,
+          width: double.infinity,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.account_circle_outlined,
+                  size: 16, color: Color(0xFF023616)),
+              const SizedBox(width: 8),
+              Text(
+                'I already have a Trail Pass',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  height: 20 / 14,
+                  letterSpacing: 0.1,
+                  color: const Color(0xFF023616),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LegalText extends StatelessWidget {
+  const _LegalText();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Text(
+        'By continuing, you agree to backcountry trail safety '
+            'protocols and official TAAN permit guidelines.',
+        textAlign: TextAlign.center,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          height: 16 / 11,
+          letterSpacing: 0.5,
+          color: const Color(0xFF414941),
+        ),
       ),
     );
   }
