@@ -2,6 +2,7 @@ import 'screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/settings_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/forgot': (_) => const Scaffold(
           body: Center(child: Text('Forgot password')),
         ),
+        '/settings': (_) => const SettingsScreen(),
       },
     );
   }
