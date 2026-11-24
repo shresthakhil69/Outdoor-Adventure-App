@@ -1,5 +1,6 @@
 import 'screens/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'screens/level_interest_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_screen.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
           body: Center(child: Text('Forgot password')),
         ),
         '/settings': (_) => const SettingsScreen(),
+        '/edit-profile': (_) => const LevelInterestScreen(),
       },
     );
   }

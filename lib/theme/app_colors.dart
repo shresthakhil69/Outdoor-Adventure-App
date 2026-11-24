@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Colours taken from the Figma design.
 /// First block: S02 (Login) colours. Second block: S20 (Settings) colours.
+/// Third block: S04 (Level and Interests) colours.
 class AppColors {
   // ---- Login / shared (from develop) ----
   static const background = Color(0xFFF8FAF6);
@@ -40,4 +41,13 @@ class AppColors {
   static const error = Color(0xFF93000A);
   static const rust = Color(0xFF7F2300);
   static const priority = Color(0xFFFF9472);
+
+  // ---- Level and Interests screen (Biraj) ----
+  static const accentText = Color(0xFF316E52); // text on mint
+  static const textPrimary = Color(0xFF191C1A);
+  static const textSecondary = Color(0xFF414941);
+  static const neutralPill = Color(0xFFE7E9E5); // step pill, icon boxes
+  static const neutralBadge = Color(0xFFE1E3DF); // "Single Choice", radio
+  static const neutralTag = Color(0xFFEDEEEB); // small stat tags
+  static const onPrimary = Color(0xFFFFFFFF);
 }

@@ -12,7 +12,7 @@ class AppTextStyles {
     required double size,
     required double lineHeight,
     required FontWeight weight,
-    required Color color,
+    Color color = AppColors.textPrimary,
     double letterSpacing = 0,
   }) {
     return GoogleFonts.plusJakartaSans(
@@ -23,6 +23,8 @@ class AppTextStyles {
       color: color,
     );
   }
+
+  // ---- Login / Settings / shared (from develop) ----
 
   static final appTitle = _style(
       size: 18, lineHeight: 22, weight: FontWeight.w600,
@@ -79,4 +81,89 @@ class AppTextStyles {
   static final footerSmall = _style(
       size: 11, lineHeight: 14, weight: FontWeight.w400,
       color: AppColors.outline);
+
+  // ---- Level and Interests screen (Biraj) ----
+
+  /// "YAK & TRAIL NEPAL" (use .toUpperCase() on the text)
+  static TextStyle get eyebrow => _style(
+    size: 11,
+    weight: FontWeight.w700,
+    lineHeight: 16,
+    letterSpacing: 0.55,
+    color: AppColors.accent,
+  );
+
+  /// "ALPINE GRID - ACTIVE"
+  static TextStyle get statusPill => _style(
+    size: 11,
+    weight: FontWeight.w600,
+    lineHeight: 16,
+    letterSpacing: 0.55,
+    color: AppColors.accentText,
+  );
+
+  /// "Your Trail Profile" (renamed from pageTitle)
+  static TextStyle get profileTitle =>
+      _style(size: 26, weight: FontWeight.w700, lineHeight: 34);
+
+  /// Paragraph under the page title.
+  static TextStyle get body => _style(
+    size: 14,
+    weight: FontWeight.w400,
+    lineHeight: 20,
+    letterSpacing: 0.25,
+    color: AppColors.textSecondary,
+  );
+
+  /// "Experience Level", "Favourite Activities", card titles
+  static TextStyle get sectionTitle => _style(
+    size: 16,
+    weight: FontWeight.w600,
+    lineHeight: 24,
+    letterSpacing: 0.15,
+  );
+
+  /// Small helper text (renamed from caption)
+  static TextStyle get profileCaption => _style(
+    size: 11,
+    weight: FontWeight.w500,
+    lineHeight: 16,
+    letterSpacing: 0.5,
+    color: AppColors.textSecondary,
+  );
+
+  /// Badges and tags ("Single Choice", "Recommended", "Max 2,874m")
+  static TextStyle get badge => _style(
+    size: 11,
+    weight: FontWeight.w600,
+    lineHeight: 16,
+    letterSpacing: 0.5,
+    color: AppColors.textSecondary,
+  );
+
+  /// "Step 3 of 3"
+  static TextStyle get stepPrimary => _style(
+    size: 12,
+    weight: FontWeight.w600,
+    lineHeight: 16,
+    letterSpacing: 0.3,
+    color: AppColors.primary,
+  );
+
+  /// Activity chip text
+  static TextStyle get chipLabel => _style(
+    size: 14,
+    weight: FontWeight.w600,
+    lineHeight: 20,
+    letterSpacing: 0.1,
+  );
+
+  /// Main button text
+  static TextStyle get button => _style(
+    size: 14,
+    weight: FontWeight.w700,
+    lineHeight: 20,
+    letterSpacing: 0.1,
+    color: AppColors.onPrimary,
+  );
 }
