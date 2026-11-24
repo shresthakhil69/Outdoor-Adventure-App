@@ -1,33 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:outdoor_adventure/theme/app_colors.dart';
-import 'package:outdoor_adventure/theme/app_text_styles.dart';
 
-/// Small rounded label: "Single Choice", "Recommended".
+import '../theme/app_text_styles.dart';
+
+/// Small rounded label, e.g. "3 Active", "v2.4.1 Online", "Alpine Pro Member".
 class PillBadge extends StatelessWidget {
-  final String label;
-  final Color backgroundColor;
-  final Color textColor;
-  final FontWeight? weight;
-
   const PillBadge({
     super.key,
-    required this.label,
-    this.backgroundColor = AppColors.neutralBadge,
-    this.textColor = AppColors.textSecondary,
-    this.weight,
+    required this.text,
+    required this.background,
+    required this.textColor,
+    this.dotColor,
+    this.radius = 999,
+    this.textStyle,
+    this.padding = const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
   });
+
+  final String text;
+  final Color background;
+  final Color textColor;
+  final Color? dotColor;
+  final double radius;
+  final TextStyle? textStyle;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
+    final style = (textStyle ?? AppTextStyles.chip).copyWith(color: textColor);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
+        color: background,
+        borderRadius: BorderRadius.circular(radius),
       ),
-      child: Text(
-        label,
-        style: AppTextStyles.badge.copyWith(color: textColor, fontWeight: weight),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (dotColor != null) ...[
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 6),
+          ],
+          Text(text, style: style),
+        ],
       ),
     );
   }

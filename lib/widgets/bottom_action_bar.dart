@@ -21,7 +21,7 @@ class BottomActionBar extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xF2FFFFFF), // white, 95% opacity
-        boxShadow: AppShadows.bottomBar,
+        boxShadow: ProfileShadows.bottomBar,
       ),
       child: SafeArea(
         top: false,
@@ -66,8 +66,7 @@ class BottomActionBar extends StatelessWidget {
               Text(
                 helperText,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.caption,
-              ),
+                style: AppTextStyles.profileCaption,              ),
             ],
           ),
         ),

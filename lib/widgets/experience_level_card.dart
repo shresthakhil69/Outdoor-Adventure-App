@@ -3,8 +3,7 @@ import 'package:outdoor_adventure/models/experience_level.dart';
 import 'package:outdoor_adventure/theme/app_colors.dart';
 import 'package:outdoor_adventure/theme/app_shadows.dart';
 import 'package:outdoor_adventure/theme/app_text_styles.dart';
-import 'package:outdoor_adventure/widgets/pill_badge.dart';
-
+import 'package:outdoor_adventure/widgets/profile_pill_badge.dart';
 /// One radio-style card in the "Experience Level" section.
 class ExperienceLevelCard extends StatelessWidget {
   final ExperienceLevel level;
@@ -30,7 +29,7 @@ class ExperienceLevelCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: selected ? AppShadows.medium : AppShadows.small,
+          boxShadow: selected ? ProfileShadows.medium : ProfileShadows.small,
         ),
         child: Material(
           color: Colors.transparent,
@@ -84,7 +83,7 @@ class _IconBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: selected ? AppColors.primary : AppColors.neutralPill,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: selected ? AppShadows.small : null,
+        boxShadow: selected ? ProfileShadows.small : null,
       ),
       child: Icon(
         icon,
@@ -113,7 +112,7 @@ class _Details extends StatelessWidget {
           children: [
             Text(level.title, style: AppTextStyles.sectionTitle),
             if (level.recommended)
-              const PillBadge(
+              const ProfilePillBadge(
                 label: 'Recommended',
                 backgroundColor: AppColors.mint,
                 textColor: AppColors.accentText,
@@ -153,8 +152,7 @@ class _Details extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Expanded(child: Text(level.note, style: AppTextStyles.caption)),
-          ],
+            Expanded(child: Text(level.note, style: AppTextStyles.profileCaption)),          ],
         ),
       ],
     );
@@ -175,7 +173,7 @@ class _RadioIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: selected ? AppColors.primary : AppColors.neutralBadge,
         shape: BoxShape.circle,
-        boxShadow: selected ? AppShadows.small : null,
+        boxShadow: selected ? ProfileShadows.small : null,
       ),
       child: Center(
         child: selected

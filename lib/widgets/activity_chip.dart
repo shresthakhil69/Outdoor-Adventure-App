@@ -29,7 +29,7 @@ class ActivityChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: AppShadows.small,
+          boxShadow: ProfileShadows.small,
         ),
         child: Material(
           color: Colors.transparent,

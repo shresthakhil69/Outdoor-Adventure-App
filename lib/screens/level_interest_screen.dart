@@ -8,10 +8,9 @@ import 'package:outdoor_adventure/widgets/alpine_status_bar.dart';
 import 'package:outdoor_adventure/widgets/bottom_action_bar.dart';
 import 'package:outdoor_adventure/widgets/brand_title.dart';
 import 'package:outdoor_adventure/widgets/experience_level_card.dart';
-import 'package:outdoor_adventure/widgets/pill_badge.dart';
+import 'package:outdoor_adventure/widgets/profile_pill_badge.dart';
 import 'package:outdoor_adventure/widgets/profile_header.dart';
-import 'package:outdoor_adventure/widgets/section_header.dart';
-
+import 'package:outdoor_adventure/widgets/profile_section_header.dart';
 /// S04 - Level and Interests
 class LevelInterestScreen extends StatefulWidget {
   const LevelInterestScreen({super.key});
@@ -86,10 +85,10 @@ class _LevelInterestScreenState extends State<LevelInterestScreen> {
                   const SizedBox(height: 24),
 
                   // Section 1: Experience level (single choice)
-                  const SectionHeader(
+                  const ProfileSectionHeader(
                     title: 'Experience Level',
                     subtitle: 'Select your high-altitude comfort baseline',
-                    trailing: PillBadge(label: 'Single Choice'),
+                    trailing: ProfilePillBadge(label: 'Single Choice'),
                   ),
                   const SizedBox(height: 12),
                   for (final level in experienceLevels) ...[
@@ -103,7 +102,7 @@ class _LevelInterestScreenState extends State<LevelInterestScreen> {
                   const SizedBox(height: 12),
 
                   // Section 2: Favourite activities (multi select)
-                  SectionHeader(
+                  ProfileSectionHeader(
                     title: 'Favourite Activities',
                     subtitle: 'Tap to customize trail filters and topo overlays',
                     trailing: Text(

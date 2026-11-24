@@ -30,7 +30,7 @@ class BrandTitle extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: AppShadows.small,
+                boxShadow: ProfileShadows.small,
               ),
               child: const Icon(Icons.landscape,
                   size: 22, color: AppColors.onPrimary),
@@ -42,8 +42,7 @@ class BrandTitle extends StatelessWidget {
                 children: [
                   Text(eyebrow.toUpperCase(), style: AppTextStyles.eyebrow),
                   const SizedBox(height: 2),
-                  Text(title, style: AppTextStyles.pageTitle),
-                ],
+                  Text(title, style: AppTextStyles.profileTitle),                ],
               ),
             ),
           ],

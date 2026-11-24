@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-class AppShadows {
-  AppShadows._();
+/// Shadows for the Level and Interests screen (Biraj).
+/// Named ProfileShadows so it doesn't clash with AppShadows in app_theme.dart.
+class ProfileShadows {
+  ProfileShadows._();
 
   /// Resting cards, chips and buttons.
   static const List<BoxShadow> small = [

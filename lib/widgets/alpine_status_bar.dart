@@ -26,7 +26,7 @@ class AlpineStatusBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.mint,
               borderRadius: BorderRadius.circular(999),
-              boxShadow: AppShadows.small,
+              boxShadow: ProfileShadows.small,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -50,8 +50,7 @@ class AlpineStatusBar extends StatelessWidget {
               const Icon(Icons.satellite_alt,
                   size: 14, color: AppColors.textSecondary),
               const SizedBox(width: 4),
-              Text(gpsLabel, style: AppTextStyles.caption),
-            ],
+              Text(gpsLabel, style: AppTextStyles.profileCaption),            ],
           ),
         ],
       ),

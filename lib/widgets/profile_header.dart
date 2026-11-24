@@ -37,7 +37,7 @@ class ProfileHeader extends StatelessWidget {
                 height: 48,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: AppShadows.small,
+                  boxShadow: ProfileShadows.small,
                 ),
                 child: const Icon(Icons.arrow_back,
                     size: 20, color: AppColors.textPrimary),
@@ -65,8 +65,7 @@ class ProfileHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(progressLabel, style: AppTextStyles.caption),
-              ],
+                Text(progressLabel, style: AppTextStyles.profileCaption),              ],
             ),
           ),
           // Help button
