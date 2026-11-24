@@ -51,54 +51,62 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = Padding(
+    final mainContent = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: IconBox(
+            icon: icon,
+            iconColor: iconColor,
+            background: iconBackground,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(title, style: AppTextStyles.cardTitle),
+                  if (titleExtra != null) titleExtra!,
+                ],
+              ),
+              if (highlight != null)
+                _line(Text(
+                  highlight!,
+                  style: AppTextStyles.highlight
+                      .copyWith(color: highlightColor),
+                )),
+              if (description != null)
+                _line(Text(
+                  description!,
+                  style: descriptionStyle ?? AppTextStyles.labelSmall,
+                )),
+              if (caption != null)
+                _line(Text(caption!, style: AppTextStyles.caption)),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: IconBox(
-                    icon: icon,
-                    iconColor: iconColor,
-                    background: iconBackground,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(title, style: AppTextStyles.cardTitle),
-                          if (titleExtra != null) titleExtra!,
-                        ],
-                      ),
-                      if (highlight != null)
-                        _line(Text(
-                          highlight!,
-                          style: AppTextStyles.highlight
-                              .copyWith(color: highlightColor),
-                        )),
-                      if (description != null)
-                        _line(Text(
-                          description!,
-                          style: descriptionStyle ?? AppTextStyles.labelSmall,
-                        )),
-                      if (caption != null)
-                        _line(Text(caption!, style: AppTextStyles.caption)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            child: onTap != null
+                ? InkWell(
+                    onTap: onTap,
+                    borderRadius: BorderRadius.circular(8),
+                    child: mainContent,
+                  )
+                : mainContent,
           ),
           if (trailing != null) ...[
             const SizedBox(width: 12),
@@ -107,8 +115,5 @@ class SettingsTile extends StatelessWidget {
         ],
       ),
     );
-
-    if (onTap == null) return content;
-    return InkWell(onTap: onTap, child: content);
   }
 }

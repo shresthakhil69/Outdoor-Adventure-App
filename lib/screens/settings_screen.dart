@@ -26,9 +26,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _telemetry = false;
   int _unitIndex = 0; // 0 = Metric, 1 = Imperial
   int _navIndex = 4; // Profile
+  String _selectedLanguage = 'English (US)';
+  String _visibilityState = 'Public to Himalayan Community';
+  String _selectedDatum = 'WGS 84 / Survey of Nepal Grid';
+  String _checkInTime = '17:30';
+  bool _tilesCleared = false;
 
   static const _chevron =
-  Icon(Icons.chevron_right, size: 22, color: AppColors.outline);
+      Icon(Icons.chevron_right, size: 22, color: AppColors.outline);
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +59,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           const _PageHeader(),
           const SizedBox(height: 20),
-          const _AccountSummaryCard(),
+          _AccountSummaryCard(
+            onManageAccount: () => _showManageAccountDialog(context),
+          ),
           const SizedBox(height: 20),
           _safetySection(),
           const SizedBox(height: 20),
@@ -51,9 +69,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 20),
           _preferencesSection(),
           const SizedBox(height: 20),
-          const _CloudSyncCard(),
+          _CloudSyncCard(
+            tilesCleared: _tilesCleared,
+            onClearTiles: () {
+              setState(() => _tilesCleared = true);
+              _showSnackBar('Offline topo tile cache cleared (2.4 GB freed)');
+            },
+          ),
           const SizedBox(height: 28),
-          const _LogoutButton(),
+          _LogoutButton(
+            onLogout: () => _showLogoutDialog(context),
+          ),
           const SizedBox(height: 12),
           const _Footer(),
         ],
@@ -94,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               descriptionStyle: AppTextStyles.body14,
               caption: 'Alerted on SOS dispatch & missed check-ins',
               trailing: _chevron,
-              onTap: () {},
+              onTap: () => _showEmergencyContactsSheet(context),
             ),
             SettingsTile(
               icon: Icons.satellite_alt,
@@ -112,21 +138,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               highlight: 'Garmin inReach Mini 2 (Linked)',
               highlightColor: AppColors.secondary,
               caption: 'ANT+ & Bluetooth telemetry bridge active',
-              trailing: SmallButton(label: 'Configure', onPressed: () {}),
+              trailing: SmallButton(
+                label: 'Configure',
+                onPressed: () => _showSatelliteDialog(context),
+              ),
             ),
             SettingsTile(
               icon: Icons.schedule,
               iconColor: AppColors.onSurface,
               title: 'Overdue Check-in Window',
-              description: 'Default: 17:30 NPT (Teahouse Sunset Buffer)',
+              description: 'Default: $_checkInTime NPT (Teahouse Sunset Buffer)',
               caption: 'Auto-flags safety contacts after +45 min',
               trailing: SmallButton(
-                label: '17:30',
+                label: _checkInTime,
                 trailingIcon: Icons.edit,
                 background: AppColors.cardTint,
                 textColor: AppColors.primary,
                 fontWeight: FontWeight.w600,
-                onPressed: () {},
+                onPressed: () => _pickCheckInTime(context),
               ),
             ),
           ],
@@ -151,44 +180,75 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.my_location,
               title: 'Live Location Sharing',
               description:
-              'Share live breadcrumb trail during active expeditions with expedition party & safety contacts',
+                  'Share live breadcrumb trail during active expeditions with expedition party & safety contacts',
               trailing: AppToggle(
                 value: _liveLocation,
-                onChanged: (v) => setState(() => _liveLocation = v),
+                onChanged: (v) {
+                  setState(() => _liveLocation = v);
+                  _showSnackBar(v
+                      ? 'Live location sharing enabled'
+                      : 'Live location sharing paused');
+                },
               ),
-              onTap: () => setState(() => _liveLocation = !_liveLocation),
+              onTap: () {
+                setState(() => _liveLocation = !_liveLocation);
+                _showSnackBar(_liveLocation
+                    ? 'Live location sharing enabled'
+                    : 'Live location sharing paused');
+              },
             ),
             SettingsTile(
               icon: Icons.visibility_outlined,
               title: 'Profile & Trail Visibility',
-              highlight: 'Public to Himalayan Community',
-              caption: 'Ascents and field reviews visible to vetted mountaineers',
+              highlight: _visibilityState,
+              caption:
+                  'Ascents and field reviews visible to vetted mountaineers',
               trailing: const Icon(Icons.unfold_more,
                   size: 20, color: AppColors.outline),
-              onTap: () {},
+              onTap: () => _showVisibilitySheet(context),
             ),
             SettingsTile(
               icon: Icons.grid_4x4,
               title: 'Hide Camp & Lodging Geofence',
               description:
-              'Automatically conceal start/finish locations within 500m of personal lodgings & basecamps',
+                  'Automatically conceal start/finish locations within 500m of personal lodgings & basecamps',
               trailing: AppToggle(
                 value: _hideGeofence,
-                onChanged: (v) => setState(() => _hideGeofence = v),
+                onChanged: (v) {
+                  setState(() => _hideGeofence = v);
+                  _showSnackBar(v
+                      ? 'Lodging geofence enabled (500m buffer)'
+                      : 'Lodging geofence disabled');
+                },
               ),
-              onTap: () => setState(() => _hideGeofence = !_hideGeofence),
+              onTap: () {
+                setState(() => _hideGeofence = !_hideGeofence);
+                _showSnackBar(_hideGeofence
+                    ? 'Lodging geofence enabled (500m buffer)'
+                    : 'Lodging geofence disabled');
+              },
             ),
             SettingsTile(
               icon: Icons.analytics_outlined,
               iconColor: AppColors.onSurfaceVariant,
               title: 'Diagnostic Field Telemetry',
               description:
-              'Anonymous barometric drift & battery drain sharing for Himalayan terrain algorithm updates',
+                  'Anonymous barometric drift & battery drain sharing for Himalayan terrain algorithm updates',
               trailing: AppToggle(
                 value: _telemetry,
-                onChanged: (v) => setState(() => _telemetry = v),
+                onChanged: (v) {
+                  setState(() => _telemetry = v);
+                  _showSnackBar(v
+                      ? 'Field telemetry enabled'
+                      : 'Field telemetry disabled');
+                },
               ),
-              onTap: () => setState(() => _telemetry = !_telemetry),
+              onTap: () {
+                setState(() => _telemetry = !_telemetry);
+                _showSnackBar(_telemetry
+                    ? 'Field telemetry enabled'
+                    : 'Field telemetry disabled');
+              },
             ),
           ],
         ),
@@ -211,48 +271,396 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SettingsTile(
               icon: Icons.translate,
               title: 'Language & Dialect',
-              highlight: 'English (US)',
+              highlight: _selectedLanguage,
               caption: 'अंग्रेजी / नेपाली (नेपाल) • Sherpa & Tibetan support',
               trailing: _chevron,
-              onTap: () {},
+              onTap: () => _showLanguageSheet(context),
             ),
             SettingsTile(
               icon: Icons.straighten,
               title: 'Units of Measurement',
-              description: 'Meters, Kilometers, Celsius (°C)',
+              description: _unitIndex == 0
+                  ? 'Meters, Kilometers, Celsius (°C)'
+                  : 'Feet, Miles, Fahrenheit (°F)',
               trailing: SegmentedSwitch(
                 options: const ['Metric', 'Imperial'],
                 selectedIndex: _unitIndex,
-                onChanged: (i) => setState(() => _unitIndex = i),
+                onChanged: (i) {
+                  setState(() => _unitIndex = i);
+                  _showSnackBar(
+                      'Units changed to ${i == 0 ? "Metric" : "Imperial"}');
+                },
               ),
             ),
             SettingsTile(
               icon: Icons.terrain,
               title: 'Geodetic & Altitude Datum',
-              highlight: 'WGS 84 / Survey of Nepal Grid',
+              highlight: _selectedDatum,
               highlightColor: AppColors.onSurfaceVariant,
               caption: 'Calibrated for Sagarmatha / Everest survey 8848.86m',
               trailing: const Icon(Icons.tune,
                   size: 20, color: AppColors.outline),
-              onTap: () {},
+              onTap: () => _showDatumSheet(context),
             ),
             SettingsTile(
               icon: Icons.download_for_offline_outlined,
               title: 'Offline Topo Map Storage',
-              highlight: '2.4 GB Cached • Khumbu & Annapurna',
+              highlight: _tilesCleared
+                  ? 'Cache Empty • 0.0 GB Cached'
+                  : '2.4 GB Cached • Khumbu & Annapurna',
               highlightColor: AppColors.secondary,
               caption: 'Available without cellular or satellite uplink',
-              trailing: SmallButton(label: 'Manage', onPressed: () {}),
+              trailing: SmallButton(
+                label: 'Manage',
+                onPressed: () => _showOfflineStorageDialog(context),
+              ),
             ),
           ],
         ),
       ],
     );
   }
+
+  // ----------------------------------------------------------- Dialogs & Sheets
+  void _showEmergencyContactsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Emergency Contacts', style: AppTextStyles.pageTitle),
+            const SizedBox(height: 4),
+            Text('Notified instantly during SOS dispatches & overdue alerts.',
+                style: AppTextStyles.labelSmall),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const CircleAvatar(child: Text('MS')),
+              title: const Text('Maya Sharma'),
+              subtitle: const Text('+977 980-1234567 • Primary Contact'),
+              trailing: const Icon(Icons.check_circle, color: AppColors.primary),
+            ),
+            ListTile(
+              leading: const CircleAvatar(child: Text('HR')),
+              title: const Text('HRA Responders (Feriche & Pheriche)'),
+              subtitle: const Text('VHF Ch 14 / Satellite Rescue Team'),
+              trailing: const Icon(Icons.check_circle, color: AppColors.primary),
+            ),
+            ListTile(
+              leading: const CircleAvatar(child: Text('NB')),
+              title: const Text('Namche Basecamp Dispatch'),
+              subtitle: const Text('+977 38-540102'),
+              trailing: const Icon(Icons.check_circle, color: AppColors.primary),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _showSnackBar('Add Contact feature opened');
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Add Emergency Contact'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSatelliteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.satellite_alt, color: AppColors.primary),
+            SizedBox(width: 8),
+            Text('Satellite Telemetry'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Connected Device: Garmin inReach Mini 2',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text('• Protocol: ANT+ & Bluetooth Low Energy\n'
+                '• Signal Strength: Strong (5/5 Satellite Locks)\n'
+                '• Battery Level: 84%\n'
+                '• SOS Relay: Active via Iridium Network'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showSnackBar('Re-synchronizing satellite bridge...');
+            },
+            child: const Text('Sync Now', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickCheckInTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 17, minute: 30),
+    );
+    if (picked != null) {
+      final formatted =
+          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      setState(() => _checkInTime = formatted);
+      _showSnackBar('Check-in deadline set to $formatted NPT');
+    }
+  }
+
+  void _showVisibilitySheet(BuildContext context) {
+    final options = [
+      'Public to Himalayan Community',
+      'Expedition Party & Guides Only',
+      'Private (Only Me)',
+    ];
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Text('Profile & Trail Visibility',
+                style: AppTextStyles.pageTitle),
+          ),
+          for (final opt in options)
+            RadioListTile<String>(
+              value: opt,
+              groupValue: _visibilityState,
+              title: Text(opt),
+              activeColor: AppColors.primary,
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() => _visibilityState = val);
+                  Navigator.pop(ctx);
+                  _showSnackBar('Visibility updated: $val');
+                }
+              },
+            ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageSheet(BuildContext context) {
+    final languages = [
+      'English (US)',
+      'Nepali (नेपाल)',
+      'Sherpa (Sharwa)',
+      'Tibetan (Bod Skad)',
+    ];
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Text('Select Language & Dialect',
+                style: AppTextStyles.pageTitle),
+          ),
+          for (final lang in languages)
+            RadioListTile<String>(
+              value: lang,
+              groupValue: _selectedLanguage,
+              title: Text(lang),
+              activeColor: AppColors.primary,
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() => _selectedLanguage = val);
+                  Navigator.pop(ctx);
+                  _showSnackBar('Language set to $val');
+                }
+              },
+            ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  void _showDatumSheet(BuildContext context) {
+    final datums = [
+      'WGS 84 / Survey of Nepal Grid',
+      'NAD83 / Everest 1830 Datum',
+      'UTM Zone 45N (Himalayas)',
+    ];
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Text('Geodetic & Altitude Datum',
+                style: AppTextStyles.pageTitle),
+          ),
+          for (final datum in datums)
+            RadioListTile<String>(
+              value: datum,
+              groupValue: _selectedDatum,
+              title: Text(datum),
+              activeColor: AppColors.primary,
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() => _selectedDatum = val);
+                  Navigator.pop(ctx);
+                  _showSnackBar('Datum updated: $val');
+                }
+              },
+            ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  void _showOfflineStorageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Offline Topo Map Storage'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_tilesCleared
+                ? 'Current Cache: 0.0 GB'
+                : 'Current Cache: 2.4 GB'),
+            const SizedBox(height: 8),
+            const Text('• Khumbu Valley High-Res: 1.8 GB\n'
+                '• Annapurna Circuit Topo: 600 MB'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () {
+              setState(() => _tilesCleared = true);
+              Navigator.pop(ctx);
+              _showSnackBar('Map cache cleared');
+            },
+            child: const Text('Clear Storage',
+                style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showManageAccountDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Expedition Account', style: AppTextStyles.pageTitle),
+            const SizedBox(height: 12),
+            const ListTile(
+              leading: Icon(Icons.person_outline),
+              title: Text('Pemba Dorje'),
+              subtitle: Text('@pemba_dorje'),
+            ),
+            const ListTile(
+              leading: Icon(Icons.badge_outlined),
+              title: Text('Himalayan Rescue ID'),
+              subtitle: Text('HRA-NEP-8848-2024'),
+            ),
+            const ListTile(
+              leading: Icon(Icons.security),
+              title: Text('Two-Factor Authentication'),
+              subtitle: Text('Active (SMS & Authenticator)'),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Log Out'),
+        content: const Text('Are you sure you want to log out of Yak & Trail?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/login',
+                (route) => false,
+              );
+            },
+            child: const Text('Log Out', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ===========================================================================
-// Pieces that are only used on this screens
+// Pieces that are only used on this screen
 // ===========================================================================
 
 /// Back button + "Settings" title + version pill.
@@ -304,7 +712,9 @@ class _PageHeader extends StatelessWidget {
 
 /// Profile photo, name, badges and "Manage Account" link.
 class _AccountSummaryCard extends StatelessWidget {
-  const _AccountSummaryCard();
+  const _AccountSummaryCard({required this.onManageAccount});
+
+  final VoidCallback onManageAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -327,8 +737,7 @@ class _AccountSummaryCard extends StatelessWidget {
                         child: Image.asset(
                           'assets/images/pemba_dorje.jpg',
                           fit: BoxFit.cover,
-                          // Shown until you add the real photo
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (context, error, stackTrace) => Container(
                             color: AppColors.divider,
                             child: const Icon(Icons.person,
                                 size: 28, color: AppColors.outline),
@@ -400,7 +809,7 @@ class _AccountSummaryCard extends StatelessWidget {
           ),
         ),
         InkWell(
-          onTap: () {},
+          onTap: onManageAccount,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
             child: Row(
@@ -436,7 +845,13 @@ class _AccountSummaryCard extends StatelessWidget {
 
 /// Grey card at the bottom: "Cloud Sync & Tile Cache".
 class _CloudSyncCard extends StatelessWidget {
-  const _CloudSyncCard();
+  const _CloudSyncCard({
+    required this.tilesCleared,
+    required this.onClearTiles,
+  });
+
+  final bool tilesCleared;
+  final VoidCallback onClearTiles;
 
   @override
   Widget build(BuildContext context) {
@@ -458,7 +873,10 @@ class _CloudSyncCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Cloud Sync & Tile Cache', style: AppTextStyles.cardTitle),
-                Text('Last synced 09:42 NPT • 3 trails queued',
+                Text(
+                    tilesCleared
+                        ? 'Cache cleared • 0.0 GB queued'
+                        : 'Last synced 09:42 NPT • 3 trails queued',
                     style: AppTextStyles.labelSmall),
               ],
             ),
@@ -471,7 +889,7 @@ class _CloudSyncCard extends StatelessWidget {
             fontWeight: FontWeight.w600,
             radius: 999,
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 6),
-            onPressed: () {},
+            onPressed: onClearTiles,
           ),
         ],
       ),
@@ -480,7 +898,9 @@ class _CloudSyncCard extends StatelessWidget {
 }
 
 class _LogoutButton extends StatelessWidget {
-  const _LogoutButton();
+  const _LogoutButton({required this.onLogout});
+
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -493,7 +913,7 @@ class _LogoutButton extends StatelessWidget {
         borderRadius: radius,
         child: InkWell(
           borderRadius: radius,
-          onTap: () {},
+          onTap: onLogout,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -538,7 +958,7 @@ class _Footer extends StatelessWidget {
           const SizedBox(height: 5),
           Text(
             'Yak & Trail v2.4.1 (Build 8848) • High-Altitude Expedition Engine. '
-                'Crafted with care in Kathmandu & Namche Bazaar, Nepal',
+            'Crafted with care in Kathmandu & Namche Bazaar, Nepal',
             textAlign: TextAlign.center,
             style: AppTextStyles.footerSmall,
           ),
