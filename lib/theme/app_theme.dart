@@ -32,10 +32,27 @@ class AppShadows {
   ];
 }
 
+/// Theme used by develop's screens.
 ThemeData buildAppTheme() {
   return ThemeData(
     useMaterial3: true,
     scaffoldBackgroundColor: AppColors.background,
     colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
   );
+}
+
+/// Theme used by the Level and Interests screen (Biraj).
+class AppTheme {
+  AppTheme._();
+
+  static ThemeData get light {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        surface: AppColors.surface,
+      ),
+      scaffoldBackgroundColor: AppColors.background,
+    );
+  }
 }

@@ -1,14 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'screens/register_screen.dart';
+import 'package:flutter/material.dart';
+import 'screens/level_interest_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/settings_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+void main() {
   runApp(const MyApp());
 }
 
@@ -24,12 +22,16 @@ class MyApp extends StatelessWidget {
       home: const OnboardingScreen(),
       routes: {
         '/login': (_) => const LoginScreen(),
-        '/home': (_) => const HomeScreen(),
-        '/register': (_) => const RegisterScreen(),
+        '/home': (_) => const Scaffold(
+          body: Center(child: Text('Home')),
+        ),
+        '/register': (_) =>  RegisterScreen(),
 
         '/forgot': (_) => const Scaffold(
           body: Center(child: Text('Forgot password')),
         ),
+        '/settings': (_) => const SettingsScreen(),
+        '/edit-profile': (_) => const LevelInterestScreen(),
       },
     );
   }
