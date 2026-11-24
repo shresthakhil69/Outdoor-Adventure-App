@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
         ),
         '/settings': (_) => const SettingsScreen(),
         '/edit-profile': (_) => const LevelInterestScreen(),
+        '/level-interest': (_) => const LevelInterestScreen(),
       },
     );
   }

@@ -39,10 +39,7 @@ class _LevelInterestScreenState extends State<LevelInterestScreen> {
   }
 
   void _onComplete() {
-    // Frontend only. Replace with navigation / API call later.
-    _showMessage(
-      'Level: $_selectedLevelId | Activities: ${_selectedActivityIds.join(', ')}',
-    );
+    Navigator.pushReplacementNamed(context, '/home');
   }
 
   @override
