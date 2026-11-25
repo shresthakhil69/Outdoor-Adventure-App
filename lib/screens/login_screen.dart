@@ -1,3 +1,4 @@
+import '../services/auth_service.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -20,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _hidePassword = true;
   bool _cacheSession = true;
   String? _loginError; // shown for a wrong password, email stays filled in (US02)
-
+  bool _loading = false;
   @override
   void dispose() {
     _emailCtrl.dispose();
@@ -38,12 +39,26 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _validatePassword(String? v) =>
       (v == null || v.isEmpty) ? 'Enter your password' : null;
 
-  void _onLogin() {
+  Future<void> _onLogin() async {
+    if (_loading) return;
     setState(() => _loginError = null);
     if (!_formKey.currentState!.validate()) return;
-    // TODO(Sprint 2): call the real login. For now this is a fake success.
-    // To demo the wrong-password message, set: _loginError = 'Wrong email or password';
-    Navigator.pushReplacementNamed(context, '/home');
+
+    setState(() => _loading = true);
+    try {
+      await AuthService.instance.logIn(
+        email: _emailCtrl.text,
+        password: _passwordCtrl.text,
+      );
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      if (!mounted) return;
+      // The email stays filled in; only the error message appears (US02).
+      setState(() => _loginError = AuthService.message(e));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   void _todo(String what) => ScaffoldMessenger.of(context)
@@ -364,7 +379,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: PrimaryButton(
-              label: 'Log In to Trail Pass',
+              label: _loading ? 'Logging in...' : 'Log In to Trail Pass',
               trailingIcon: Icons.arrow_forward,
               onPressed: _onLogin,
             ),
