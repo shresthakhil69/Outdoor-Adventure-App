@@ -61,6 +61,7 @@ class SocialButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Color background;
   final double gap;
+  final bool isLoading;
 
   const SocialButton({
     super.key,
@@ -69,6 +70,7 @@ class SocialButton extends StatelessWidget {
     required this.onPressed,
     this.background = AppColors.white,
     this.gap = 16,
+    this.isLoading = false,
   });
 
   @override
@@ -84,11 +86,21 @@ class SocialButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onPressed,
+          onTap: isLoading ? null : onPressed,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              icon,
+              if (isLoading)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
+                )
+              else
+                icon,
               SizedBox(width: gap),
               Text(
                 label,

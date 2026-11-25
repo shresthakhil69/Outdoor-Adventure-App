@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../utils/google_auth_flow.dart';
 
 /// Sign-Up screen for creating a new Trail Pass.
 /// Displays name, email, password fields, terms checkbox, and social sign-up.
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final AuthService? authService;
+
+  const RegisterScreen({super.key, this.authService});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // Service to handle Google Sign-In and Firebase Auth
-  final _authService = AuthService();
+  late final AuthService _authService = widget.authService ?? AuthService();
 
   // Key used to validate the form inputs
   final _formKey = GlobalKey<FormState>();
@@ -30,6 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // State variables for terms and conditions checkbox
   bool _agreedToTerms = false;
   bool _showCheckboxError = false;
+  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -80,41 +83,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (isFormValid && _agreedToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Form is valid'),
-        ),
-      );
+      Navigator.pushNamed(context, '/level-interest');
     }
   }
 
-  // Handle Google Sign-In action
-  Future<void> _handleGoogleSignIn() async {
+  Future<void> _handleGoogleSignUp() async {
+    if (_isGoogleLoading) return;
+    setState(() => _isGoogleLoading = true);
     try {
-      final userCredential = await _authService.signInWithGoogle();
-      if (!mounted) return;
-
-      if (userCredential != null && userCredential.user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Welcome, ${userCredential.user?.displayName ?? 'User'}!'),
-          ),
-        );
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google Sign-In was cancelled.'),
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Sign-in failed: ${e.toString()}'),
-        ),
+      await runGoogleSignInFlow(
+        context: context,
+        authService: _authService,
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
     }
   }
 
@@ -719,18 +703,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: _handleGoogleSignIn,
+          onTap: _isGoogleLoading ? null : _handleGoogleSignUp,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'G',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF4285F4),
+              if (_isGoogleLoading)
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF1E4D2B),
+                  ),
+                )
+              else
+                const Text(
+                  'G',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF4285F4),
+                  ),
                 ),
-              ),
               const SizedBox(width: 12),
               Text(
                 'Sign up with Google',
@@ -751,31 +745,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // 11. Navigation link to Login screen
   Widget _buildLoginLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Already have a Trail Pass? ',
-          style: AppText.style(
-            size: 14,
-            weight: FontWeight.w400,
-            color: const Color(0xFF414941),
-            lineHeightPx: 20,
-          ),
-        ),
-        GestureDetector(
-          onTap: () => Navigator.pushNamed(context, '/login'),
-          child: Text(
-            'Log In',
+    return Center(
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: 4,
+        children: [
+          Text(
+            'Already have a Trail Pass? ',
             style: AppText.style(
-              size: 16,
-              weight: FontWeight.w700,
-              color: const Color(0xFF023616),
+              size: 14,
+              weight: FontWeight.w400,
+              color: const Color(0xFF414941),
               lineHeightPx: 20,
             ),
           ),
-        ),
-      ],
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/login');
+            },
+            child: Text(
+              'Log In',
+              style: AppText.style(
+                size: 16,
+                weight: FontWeight.w700,
+                color: const Color(0xFF023616),
+                lineHeightPx: 20,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

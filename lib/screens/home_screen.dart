@@ -6,12 +6,14 @@ import '../theme/app_theme.dart';
 /// Home screen displayed after successful user sign-in.
 /// Displays the user's name, email, profile picture, and a Sign Out button.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final AuthService? authService;
+
+  const HomeScreen({super.key, this.authService});
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
-    final user = authService.currentUser;
+    final service = authService ?? AuthService();
+    final user = service.currentUser;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -95,7 +97,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () async {
-                        await authService.signOut();
+                        await service.signOut();
                         if (!context.mounted) return;
                         Navigator.pushReplacementNamed(context, '/login');
                       },
