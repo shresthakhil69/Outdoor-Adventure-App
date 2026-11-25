@@ -76,11 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (isFormValid && _agreedToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Form is valid'),
-        ),
-      );
+      Navigator.pushNamed(context, '/level-interest');
     }
   }
 
@@ -733,7 +729,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         GestureDetector(
           onTap: () {
-            // TODO: Navigate to Login screen
+            Navigator.pushNamed(context, '/login');
           },
           child: Text(
             'Log In',

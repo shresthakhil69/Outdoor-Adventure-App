@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'screens/level_interest_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_screen.dart';
@@ -37,6 +38,8 @@ class MyApp extends StatelessWidget {
           body: Center(child: Text('Forgot password')),
         ),
         '/settings': (_) => const SettingsScreen(),
+        '/edit-profile': (_) => const LevelInterestScreen(),
+        '/level-interest': (_) => const LevelInterestScreen(),
       },
     );
   }
