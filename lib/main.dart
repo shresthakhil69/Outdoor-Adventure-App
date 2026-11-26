@@ -1,8 +1,9 @@
-import 'screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/level_interest_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/settings_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -22,9 +23,7 @@ class MyApp extends StatelessWidget {
       home: const OnboardingScreen(),
       routes: {
         '/login': (_) => const LoginScreen(),
-        '/home': (_) => const Scaffold(
-          body: Center(child: Text('Home')),
-        ),
+        '/home': (_) => const HomeScreen(),
         '/register': (_) =>  RegisterScreen(),
 
         '/forgot': (_) => const Scaffold(
