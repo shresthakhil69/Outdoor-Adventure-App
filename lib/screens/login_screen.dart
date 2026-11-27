@@ -1,4 +1,4 @@
-import '../services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
@@ -7,7 +7,7 @@ import '../utils/google_auth_flow.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/primary_button.dart';
 
-/// S02 - Login. UI only: no backend yet (Sprint 2).
+/// S02 - Login. Email login and Google sign-in use Firebase Auth via AuthService.
 /// Stories: US02 (email login), US03 (Google). Figma: 390 x 957, padding 16.
 class LoginScreen extends StatefulWidget {
   final AuthService? authService;
@@ -28,6 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isGoogleLoading = false;
   String? _loginError; // shown for a wrong password, email stays filled in (US02)
   bool _loading = false;
+
   @override
   void dispose() {
     _emailCtrl.dispose();
@@ -45,6 +46,29 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _validatePassword(String? v) =>
       (v == null || v.isEmpty) ? 'Enter your password' : null;
 
+  /// Turns a Firebase login error into a message a user understands.
+  String _loginMessage(Object error) {
+    if (error is FirebaseAuthException) {
+      switch (error.code) {
+        case 'invalid-email':
+          return 'Please enter a valid email address.';
+        case 'user-not-found':
+        case 'wrong-password':
+        case 'invalid-credential':
+          return 'Email or password is incorrect.';
+        case 'user-disabled':
+          return 'This account has been disabled.';
+        case 'too-many-requests':
+          return 'Too many attempts. Please wait a moment and try again.';
+        case 'network-request-failed':
+          return 'No internet connection. Please try again.';
+        default:
+          return 'Login failed (${error.code}). Please try again.';
+      }
+    }
+    return 'Something went wrong. Please try again.';
+  }
+
   Future<void> _onLogin() async {
     if (_loading) return;
     setState(() => _loginError = null);
@@ -52,16 +76,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _loading = true);
     try {
-      await AuthService.instance.logIn(
-        email: _emailCtrl.text,
-        password: _passwordCtrl.text,
+      await _authService.signInWithEmailAndPassword(
+        _emailCtrl.text.trim(),
+        _passwordCtrl.text,
       );
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       if (!mounted) return;
       // The email stays filled in; only the error message appears (US02).
-      setState(() => _loginError = AuthService.message(e));
+      setState(() => _loginError = _loginMessage(e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
