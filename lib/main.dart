@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'screens/home_screen.dart';
 import 'screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/level_interest_screen.dart';
@@ -29,9 +30,7 @@ class MyApp extends StatelessWidget {
       home: const OnboardingScreen(),
       routes: {
         '/login': (_) => const LoginScreen(),
-        '/home': (_) => const Scaffold(
-          body: Center(child: Text('Home')),
-        ),
+        '/home': (_) => const HomeScreen(),
         '/register': (_) =>  RegisterScreen(),
 
         '/forgot': (_) => const Scaffold(

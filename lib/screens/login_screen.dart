@@ -1,25 +1,31 @@
 import '../services/auth_service.dart';
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../utils/google_auth_flow.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/primary_button.dart';
 
 /// S02 - Login. UI only: no backend yet (Sprint 2).
 /// Stories: US02 (email login), US03 (Google). Figma: 390 x 957, padding 16.
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final AuthService? authService;
+
+  const LoginScreen({super.key, this.authService});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  late final AuthService _authService = widget.authService ?? AuthService();
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _hidePassword = true;
   bool _cacheSession = true;
+  bool _isGoogleLoading = false;
   String? _loginError; // shown for a wrong password, email stays filled in (US02)
   bool _loading = false;
   @override
@@ -58,6 +64,21 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _loginError = AuthService.message(e));
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    if (_isGoogleLoading) return;
+    setState(() => _isGoogleLoading = true);
+    try {
+      await runGoogleSignInFlow(
+        context: context,
+        authService: _authService,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
     }
   }
 
@@ -242,22 +263,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.shield_outlined, size: 14, color: AppColors.white),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Khumbu & Annapurna Topo Packs Loaded',
-                            style: AppText.style(
-                              size: 11,
-                              weight: FontWeight.w500,
-                              color: AppColors.white,
-                              letterSpacing: 0.275,
-                              lineHeightPx: 16,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.shield_outlined, size: 14, color: AppColors.white),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                'Khumbu & Annapurna Topo Packs Loaded',
+                                overflow: TextOverflow.ellipsis,
+                                style: AppText.style(
+                                  size: 11,
+                                  weight: FontWeight.w500,
+                                  color: AppColors.white,
+                                  letterSpacing: 0.275,
+                                  lineHeightPx: 16,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
@@ -361,14 +388,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         : null,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Cache offline session for 30 days',
-                    style: AppText.style(
-                      size: 14,
-                      weight: FontWeight.w400,
-                      color: AppColors.textBody,
-                      letterSpacing: 0.25,
-                      lineHeightPx: 20,
+                  Expanded(
+                    child: Text(
+                      'Cache offline session for 30 days',
+                      style: AppText.style(
+                        size: 14,
+                        weight: FontWeight.w400,
+                        color: AppColors.textBody,
+                        letterSpacing: 0.25,
+                        lineHeightPx: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -423,7 +452,8 @@ class _LoginScreenState extends State<LoginScreen> {
           icon: const Text('G',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF4285F4))),
           label: 'Continue with Google',
-          onPressed: () => _todo('Google sign-in'),
+          isLoading: _isGoogleLoading,
+          onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
         ),
         const SizedBox(height: 8),
         SocialButton(
@@ -443,8 +473,11 @@ class _LoginScreenState extends State<LoginScreen> {
       padding: const EdgeInsets.only(top: 24),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            runSpacing: 4,
             children: [
               Text(
                 'New to the backcountry?',
@@ -456,7 +489,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   lineHeightPx: 20,
                 ),
               ),
-              const SizedBox(width: 4),
               InkWell(
                 onTap: () => Navigator.pushNamed(context, '/register'),
                 child: Text(

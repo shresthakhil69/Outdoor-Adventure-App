@@ -1,73 +1,146 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-/// All Firebase sign-in logic lives here, so screens stay simple.
+/// User-facing exception thrown when Google Sign-In fails due to
+/// configuration, network, or provider errors (as opposed to user cancellation).
+class GoogleSignInException implements Exception {
+  final String message;
+  const GoogleSignInException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 class AuthService {
-  AuthService._();
-  static final AuthService instance = AuthService._();
+  final FirebaseAuth? _auth;
+  final GoogleSignIn? _googleSignIn;
+  final bool _isWeb;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  AuthService({
+    FirebaseAuth? auth,
+    GoogleSignIn? googleSignIn,
+    bool? isWeb,
+  })  : _auth = auth,
+        _googleSignIn = googleSignIn,
+        _isWeb = isWeb ?? kIsWeb;
 
-  User? get currentUser => _auth.currentUser;
-  Stream<User?> get authChanges => _auth.authStateChanges();
+  FirebaseAuth get _authInstance => _auth ?? FirebaseAuth.instance;
+  GoogleSignIn get _googleSignInInstance => _googleSignIn ?? GoogleSignIn();
 
-  /// Create account (US01) and save the profile in Firestore.
-  Future<void> signUp({
-    required String name,
-    required String email,
-    required String password,
-  }) async {
-    final cred = await _auth.createUserWithEmailAndPassword(
-      email: email.trim(),
+  User? get currentUser => _authInstance.currentUser;
+
+  /// Signs in with Google without requiring the user to create an app password.
+  ///
+  /// Returns `null` if the user cancels the Google prompt or closes the web popup.
+  /// Throws [GoogleSignInException] for actual authentication/configuration failures.
+  Future<UserCredential?> signInWithGoogle() async {
+    if (_isWeb) {
+      return _signInWithGoogleWeb();
+    }
+    return _signInWithGoogleMobile();
+  }
+
+  Future<UserCredential?> _signInWithGoogleWeb() async {
+    try {
+      final provider = GoogleAuthProvider();
+      return await _authInstance.signInWithPopup(provider);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'popup-closed-by-user' ||
+          e.code == 'cancelled-popup-request') {
+        return null;
+      }
+      throw GoogleSignInException(_friendlyFirebaseMessage(e));
+    }
+  }
+
+  Future<UserCredential?> _signInWithGoogleMobile() async {
+    try {
+      final GoogleSignInAccount? googleUser =
+          await _googleSignInInstance.signIn();
+      if (googleUser == null) return null;
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      if (googleAuth.idToken == null && googleAuth.accessToken == null) {
+        throw const GoogleSignInException(
+          'Google Sign-In did not return authentication tokens. '
+          'Verify Firebase OAuth configuration.',
+        );
+      }
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      return await _authInstance.signInWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      throw GoogleSignInException(_friendlyFirebaseMessage(e));
+    } on PlatformException catch (e) {
+      if (e.code == 'sign_in_canceled' || e.code == 'canceled') {
+        return null;
+      }
+      throw GoogleSignInException(_friendlyPlatformMessage(e));
+    }
+  }
+
+  Future<UserCredential?> signInWithEmailAndPassword(
+      String email, String password) async {
+    return await _authInstance.signInWithEmailAndPassword(
+      email: email,
       password: password,
     );
-    await cred.user!.updateDisplayName(name.trim());
-    await _db.collection('users').doc(cred.user!.uid).set({
-      'name': name.trim(),
-      'email': email.trim(),
-      'createdAt': FieldValue.serverTimestamp(),
-    });
   }
 
-  /// Log in with email and password (US02).
-  Future<void> logIn({required String email, required String password}) async {
-    await _auth.signInWithEmailAndPassword(
-      email: email.trim(),
+  Future<UserCredential?> createUserWithEmailAndPassword(
+      String email, String password) async {
+    return await _authInstance.createUserWithEmailAndPassword(
+      email: email,
       password: password,
     );
   }
 
-  /// Send a password reset email (US04).
-  Future<void> resetPassword(String email) async {
-    await _auth.sendPasswordResetEmail(email: email.trim());
-  }
-
-  /// Log out (US10).
-  Future<void> logOut() => _auth.signOut();
-
-  /// Turn a Firebase error into a message a user understands.
-  static String message(Object error) {
-    if (error is FirebaseAuthException) {
-      switch (error.code) {
-        case 'email-already-in-use':
-          return 'This email is already registered. Try logging in.';
-        case 'invalid-email':
-          return 'Please enter a valid email address.';
-        case 'weak-password':
-          return 'Password is too weak. Use at least 6 characters.';
-        case 'user-not-found':
-        case 'wrong-password':
-        case 'invalid-credential':
-          return 'Email or password is incorrect.';
-        case 'too-many-requests':
-          return 'Too many attempts. Please wait a moment and try again.';
-        case 'network-request-failed':
-          return 'No internet connection. Please try again.';
-        default:
-          return 'Something went wrong (${error.code}). Please try again.';
+  Future<void> signOut() async {
+    if (!_isWeb) {
+      try {
+        await _googleSignInInstance.signOut();
+      } catch (_) {
+        // Ignore if user was not signed in via GoogleSignIn.
       }
     }
-    return 'Something went wrong. Please try again.';
+    await _authInstance.signOut();
+  }
+
+  String _friendlyFirebaseMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'account-exists-with-different-credential':
+        return 'An account already exists with this email using a different sign-in method.';
+      case 'network-request-failed':
+        return 'Network error. Check your internet connection and try again.';
+      case 'operation-not-allowed':
+        return 'Google Sign-In is not enabled in Firebase Authentication.';
+      case 'popup-blocked':
+        return 'Sign-in popup was blocked by your browser. Allow popups and try again.';
+      case 'user-disabled':
+        return 'This Google account has been disabled.';
+      default:
+        return e.message ?? 'Google Sign-In failed (${e.code}).';
+    }
+  }
+
+  String _friendlyPlatformMessage(PlatformException e) {
+    final msg = e.message ?? '';
+    if (msg.contains('ApiException: 10') ||
+        (e.code == 'sign_in_failed' && msg.contains('10'))) {
+      return 'Google Sign-In is not configured for this Android app '
+          '(missing SHA-1 / OAuth client in Firebase).';
+    }
+    if (e.code == 'network_error') {
+      return 'Network error. Check your internet connection and try again.';
+    }
+    return msg.isNotEmpty ? msg : 'Google Sign-In failed (${e.code}).';
   }
 }
