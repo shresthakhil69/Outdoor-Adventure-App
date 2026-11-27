@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -33,6 +34,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _agreedToTerms = false;
   bool _showCheckboxError = false;
   bool _isGoogleLoading = false;
+  bool _isSubmitting = false;
+  String? _submitError;
 
   @override
   void dispose() {
@@ -76,14 +79,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Handle form submission
-  void _onSubmit() {
+  String _registerMessage(Object error) {
+    if (error is FirebaseAuthException) {
+      switch (error.code) {
+        case 'email-already-in-use':
+          return 'This email is already registered. Try logging in.';
+        case 'invalid-email':
+          return 'Please enter a valid email address.';
+        case 'weak-password':
+          return 'Password is too weak. Use at least 8 characters.';
+        case 'operation-not-allowed':
+          return 'Email sign-up is not enabled in Firebase.';
+        case 'network-request-failed':
+          return 'No internet connection. Please try again.';
+        default:
+          return 'Sign-up failed (${error.code}). Please try again.';
+      }
+    }
+    return 'Something went wrong. Please try again.';
+  }
+
+  Future<void> _onSubmit() async {
+    if (_isSubmitting) return;
     final isFormValid = _formKey.currentState?.validate() ?? false;
     setState(() {
       _showCheckboxError = !_agreedToTerms;
+      _submitError = null;
     });
+    if (!isFormValid || !_agreedToTerms) return;
 
-    if (isFormValid && _agreedToTerms) {
-      Navigator.pushNamed(context, '/level-interest');
+    setState(() => _isSubmitting = true);
+    try {
+      final cred = await _authService.createUserWithEmailAndPassword(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+      await cred?.user?.updateDisplayName(_nameController.text.trim());
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/level-interest');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _submitError = _registerMessage(e));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -464,18 +502,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   alignment: Alignment.center,
                   child: _agreedToTerms
                       ? Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF023616),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        )
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF023616),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  )
                       : null,
                 ),
                 const SizedBox(width: 12),
@@ -528,12 +566,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: _onSubmit,
+                onTap: _isSubmitting ? null : _onSubmit,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Create Trail Pass',
+                      _isSubmitting ? 'Creating...' : 'Create Trail Pass',
                       style: AppText.style(
                         size: 14,
                         weight: FontWeight.w600,
@@ -553,6 +591,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
           ),
+          if (_submitError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 4),
+              child: Text(
+                _submitError!,
+                style: AppText.style(
+                  size: 12,
+                  weight: FontWeight.w500,
+                  color: const Color(0xFFBA1A1A),
+                ),
+              ),
+            ),
         ],
       ),
     );
